@@ -42,7 +42,23 @@ def hello():
 def twitter():
     if request.method=='POST':
         if request.form['tweet']:
+            resp="Delicious deals at these restaurants\n"
             print "TWEET:%s" %(request.form['tweet'])
+            response=dry_run(request.form['tweet'])
+            results=Cheating("restaurants",response['response']).targets()
+            count=1
+            for i in results:
+                print(i.name)
+                resp=resp+str(count)+" "+i.name+'\n'
+                count+=1
+                if len(resp) <=0:
+                    resp="no results found"
+            try:
+                message = client.messages.create(body=resp,
+                                                 to='+16316939371',    # Replace with your phone number
+                                                 from_="+19196799036") # Replace with your Twilio number
+            except Exception as e:
+                print(e)
         else:
             print "no tweet data"
         return "OK"
@@ -76,6 +92,7 @@ def credit():
             print "NOPE"
         return "OK"
 
+@app.route("/input",methods = ['POST','GET'])
 def input():
     if request.method=='POST':
         # print str(request.form)
@@ -107,15 +124,20 @@ def input():
             if len(resp) <=0:
                 resp="no results found"
         elif(action=='SAVE'):
-            if target=="checkSavingsBuy":
+            if t[2]=="checkSavingsBuy":
                 checkSavingsBuy("car")
-            elif target=="checkSavingsStudy":
+            elif t[2]=="checkSavingsStudy":
                 checkSavingStudy
                 pass
-            elif targey=="checkSavingsSpend":
+            elif t[2]=="checkSavingsSpend":
                 pass
             else:
-                print "invalid target in SAVE action"
+                #-------------------------------------------
+                if isdigit(t[2])==True:
+                    savePerDay = t[2]/t[4]
+                    resp = dry_run('SAVE '+str(savePerDay))
+                else:
+                    resp = response['response']
         elif(action=='BEST_RATES'):
             results=Cheating(target).targets()
             count=1
@@ -123,10 +145,11 @@ def input():
                 print(i.name)
                 resp=resp+str(count)+" "+i.name+'\n'
                 count+=1
-            if len(resp) <=0:
-                resp="no results found"
+                if len(resp) <=0:
+                    resp="no results found"
         else:
-            print "invalid action"
+            resp=response['response']
+            print response
         try:
             message = client.messages.create(body=resp,
                                              to=request.form['From'],    # Replace with your phone number
