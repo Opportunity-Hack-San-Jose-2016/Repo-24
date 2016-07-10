@@ -13,7 +13,8 @@ class db_formation(object):
         self.r = redis.StrictRedis(host='localhost')
 
     def insert(self,phone_number,salary,expense,amount,date,item):
-        current_set = {"salary":salary,"expenditure":expense,"item_amount":amount,"date":date,"item_name":item}
+        current_set = {"salary":salary,"expenditure":expense,"item_amount":amount,"date":date,"item_name":item,"goal":100,"savings_rate":1,"daily_goal":99,
+                       "savings_per_goal":0,"expense_per_day":0,'goal_eta':100}
         print current_set
         self.r.hmset(phone_number,current_set)
 
@@ -32,18 +33,6 @@ auth_token  = "f15cf79758f1cf0093ecb1d1c15fb14c"  # Your Auth Token from www.twi
 
 client = TwilioRestClient(account_sid, auth_token)
 
-from apscheduler.scheduler import Scheduler
-
-def checkSecondApi():
-    with app.app_context():
-        # Do whatever you were doing to check the second API
-        print "HELLO"
-
-@app.before_first_request
-def initialize():
-    apsched = Scheduler()
-    apsched.start()
-    apsched.add_interval_job(checkSecondAPI, seconds=5)
 
 @app.route("/")
 def hello():
@@ -66,12 +55,13 @@ def credit():
             # got expense
             # check if its below your daily goal, alert user OK
             # if its over goal, adjust the gaoal ETA and alert user
-            expense = request.form['item']
+            expense = request.form['value']
             obj = db_formation()
             t=obj.r.hgetall("+19197445728")
             response=""
-            t['expense_per_day'] += expense
-            print "EXPENSE:%d\nEXPENSE_PER_DAY:%d" % (expense,t['expense_per_day'])
+            t['expense_per_day'] = int(t['expense_per_day'])+int(expense)
+            obj.r.hmset("+19197445728",t)
+            print "EXPENSE:%s\nEXPENSE_PER_DAY:%s" % (expense,t['expense_per_day'])
             # if(expense+t['todays_expense'] < t['daily_goal']):
             #     # ok
             #     t['todays_expense']+=expense
@@ -152,6 +142,6 @@ def input():
 
 if __name__ == "__main__":
     obj = db_formation()
-    obj.insert("+19197445728","1000","800",12, "12.04.2016", "lunch")
+    obj.insert("+19197445728",1000,800,12, "12.04.2016", "lunch")
     obj.display("+19197445728")
     app.run(host="0.0.0.0", port=80,debug=True)
