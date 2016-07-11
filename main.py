@@ -28,8 +28,8 @@ from twilio.rest import TwilioRestClient
 
 indeed_client = IndeedClient('9093816856988990')
 
-account_sid = "ACe8e7416fc2481af951f75f17212de45c" # Your Account SID from www.twilio.com/console
-auth_token  = "f15cf79758f1cf0093ecb1d1c15fb14c"  # Your Auth Token from www.twilio.com/console
+account_sid = # Your Account SID from www.twilio.com/console
+auth_token  = # Your Auth Token from www.twilio.com/console
 
 client = TwilioRestClient(account_sid, auth_token)
 
@@ -153,7 +153,7 @@ def input():
         try:
             message = client.messages.create(body=resp,
                                              to=request.form['From'],    # Replace with your phone number
-                                             from_="+19196799036") # Replace with your Twilio number
+                                             from_="# Replace with your Twilio number") 
         except Exception as e:
             print(e)
 
@@ -165,6 +165,6 @@ def input():
 
 if __name__ == "__main__":
     obj = db_formation()
-    obj.insert("+19197445728",1000,800,12, "12.04.2016", "lunch")
-    obj.display("+19197445728")
+    obj.insert("your number",1000,800,12, "12.04.2016", "lunch")
+    obj.display("your number")
     app.run(host="0.0.0.0", port=80,debug=True)
